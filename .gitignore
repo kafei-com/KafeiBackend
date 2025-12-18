@@ -1,0 +1,85 @@
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# Byte-compiled / cache
+.cache/
+.pytest_cache/
+
+# -------------------------
+# Environment variables
+# -------------------------
+.env
+.env.*       # If you ever create .env.development, .env.production etc.
+
+# -------------------------
+# OS-specific files
+# -------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# -------------------------
+# Editor / IDE
+# -------------------------
+.vscode/
+.idea/
+
+# -------------------------
+# Logs & dumps
+# -------------------------
+*.log
+logs/
+*.sqlite3
+*.db
+
+# -------------------------
+# Docker
+# -------------------------
+docker/*/tmp/
+docker/*.log
+docker-compose.override.yml
+
+# -------------------------
+# Test Outputs
+# -------------------------
+test_output.txt
+test_output_user.txt
+test_output_*.txt
+coverage.xml
+htmlcov/
+.coverage
+.coverage.*
+
+# -------------------------
+# Build / Distribution
+# -------------------------
+build/
+dist/
+*.egg-info/
+
+# -------------------------
+# Others
+# -------------------------
+*.bak
+*.tmp
+*.swp

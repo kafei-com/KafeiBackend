@@ -1,0 +1,32 @@
+You are an expert system architect. Based on the following input, generate:
+1. High-level architecture description
+2. Mermaid component diagram
+3. Mermaid sequence diagram
+4. Folder structure
+5. Tech stack
+6. Deployment instructions
+7. Risks & tradeoffs
+
+Input:
+{input}
+
+Respond ONLY with valid raw JSON:
+{{
+  "architecture": "...",
+  "diagram": "...",
+  "structure": "...",
+  "deployment": "...",
+  "risks": "..."
+}}
+
+Do NOT include triple backticks or code fences.
+Do NOT wrap JSON in ```json blocks.
+Do NOT include mermaid inside backticks — output mermaid plain text only.
+
+The `structure` field must be a JSON array of folder and file paths like:
+"structure": [
+  "app/",
+  "app/main.py",
+  "app/models/",
+  "app/models/user.py"
+]

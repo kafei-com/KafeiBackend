@@ -1,0 +1,39 @@
+# Main App
+fastapi
+uvicorn[standard]
+
+# DB
+sqlmodel
+sqlalchemy
+psycopg[binary]
+alembic
+pgvector
+email-validator
+
+
+# Auth & Security
+argon2-cffi
+python-jose[cryptography]
+redis
+slowapi
+
+# Config
+python-dotenv
+pydantic
+pydantic-settings
+
+# Background & HTTP
+httpx
+aiofiles
+
+# AI / LangChain (unchanged)
+langchain
+langchain_groq
+openai
+tiktoken
+
+# Dev
+pytest
+black
+flake8
+mypy
