@@ -6,6 +6,7 @@ from app.db.database import init_db
 from app.routes.generate import router as generate_router
 from app.services.generation_service import GenerationService 
 from app.routes.auth import router as auth_router
+from app.routes.users import router as users_router
 # Assuming GenerationService is still imported and contains the LLMProvider
 
 # Global variable to hold the initialized service instance
@@ -39,3 +40,4 @@ app = FastAPI(title="Kafei Backend", lifespan=lifespan)
 # ... (include router logic, potentially updating it to use the global_generation_service)
 app.include_router(generate_router, prefix="/generate")
 app.include_router(auth_router)
+app.include_router(users_router)
