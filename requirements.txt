@@ -16,6 +16,7 @@ argon2-cffi
 python-jose[cryptography]
 redis
 slowapi
+PyJWT
 
 # Config
 python-dotenv
@@ -31,6 +32,7 @@ langchain
 langchain_groq
 openai
 tiktoken
+langchain-google-genai
 
 # Dev
 pytest

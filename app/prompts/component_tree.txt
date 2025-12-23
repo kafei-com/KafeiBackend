@@ -1,0 +1,25 @@
+You are a software architect.
+
+Based on the following system design, generate a COMPONENT TREE.
+
+System Design:
+{input}
+
+Rules (VERY IMPORTANT):
+- Respond ONLY with valid raw JSON
+- Do NOT include markdown
+- Do NOT include explanations
+- Do NOT include code fences
+- Output must be a JSON object with this exact shape:
+
+{{
+  "folders": [
+    "app/",
+    "app/main.py",
+    "app/routes/",
+    "app/services/"
+  ]
+}}
+
+- The "folders" array must contain file and directory paths
+- Paths must be realistic for a production project
