@@ -1,9 +1,13 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    GROQ_API_KEY: str
+    GROQ_API_KEY: str | None = None
+    GEMINI_API_KEY: str
+    
     LLM_MODEL: str = "llama-3.1-8b-instant"
+
     LLM_PROVIDER: str = "groq"
+    LLM_PROVIDER: str = "gemini"
     SECRET_KEY: str | None = None
     DB_PASSWORD: str
     DATABASE_URL: str
