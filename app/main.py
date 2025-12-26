@@ -10,30 +10,25 @@ from app.core.docs import scalar_docs
 # Assuming GenerationService is still imported and contains the LLMProvider
 
 # Global variable to hold the initialized service instance
-global_generation_service: GenerationService = None
+global_generation_service: GenerationService | None = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- Startup Logic (Connect/Initialize) ---
+    global global_generation_service
+
     print("Starting up resources...")
     init_db()
-    
-    # Initialize the GenerationService, which initializes LLMProvider
-    global global_generation_service
-    global_generation_service = GenerationService()
-    
-    yield # The application runs here
-    
-    # --- Shutdown Logic (The Cleanup) ---
-    print("Initiating graceful shutdown for all services.")
-    
-    # Call the shutdown method on the LLMProvider instance
-    # The GenerationService holds the LLMProvider instance.
-    if global_generation_service:
-        await global_generation_service.llm.shutdown() 
-    
-    print("Cleanup complete. Ready to exit.")
 
+    global_generation_service = GenerationService()
+
+    yield
+
+    print("Initiating graceful shutdown...")
+    if global_generation_service:
+        await global_generation_service.shutdown()
+    print("Shutdown complete.")
+
+#  hello world
 # Pass the lifespan context manager to the FastAPI app
 app = FastAPI(title="Kafei Backend", lifespan=lifespan, docs_url=None, redoc_url=None)
 

@@ -5,3 +5,6 @@ TEMPERATURE_SEQUENCE = [
     0.1,  # more deterministic
     0.0   # strict
 ]
+
+PRIMARY_MODEL = "gemini"
+FALLBACK_MODEL = "groq"
