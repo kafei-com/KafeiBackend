@@ -1,8 +1,11 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
-from app.config import settings
+from app.core.config import settings
 from app.utils.json_fix import safe_json_loads
 from app.services.llm.base import BaseLLM
+# from langchain_core.callbacks import AsyncIteratorCallbackHandler, CallbackManager
+# import asyncio
+# from langchain.callbacks.streaming_aiter import AsyncIteratorCallbackHandler
 
 
 class GeminiLLMProvider(BaseLLM):
@@ -12,20 +15,13 @@ class GeminiLLMProvider(BaseLLM):
             model="gemini-2.5-flash",
             temperature=self.temperature,
             google_api_key=settings.GEMINI_API_KEY,
+            streaming=True,
         )
 
     async def generate_system_design(self, payload_text: str) -> str:
         prompt = PromptTemplate.from_file(
             "app/prompts/system_design.txt"
         )
-
-        # payload_text = f"""
-        # Project Name: {payload.project_name}
-        # Description: {payload.description}
-        # Use Case: {payload.use_case}
-        # Requirements: {payload.requirements}
-        # Tech Stack: {payload.tech_stack}
-        # """
 
         chain = prompt | self.model
         result = chain.invoke({"input": payload_text})
@@ -46,3 +42,12 @@ class GeminiLLMProvider(BaseLLM):
 
     async def shutdown(self):
         print("Gemini LLM shutdown complete.")
+
+    async def stream_system_design(self, payload_text: str):
+        prompt = PromptTemplate.from_file("app/prompts/system_design.txt")
+        chain = prompt | self.model
+
+        # 🔥 Native async token streaming
+        async for chunk in chain.astream({"input": payload_text}):
+            if chunk.content:
+                yield chunk.content

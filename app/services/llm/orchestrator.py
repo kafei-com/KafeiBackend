@@ -1,19 +1,44 @@
 from app.services.llm.gemini_provider import GeminiLLMProvider
+from app.services.llm.groq_provider import GroqLLMProvider
+from app.core.config import settings
 
 class LLMOrchestrator:
-    """
-    Responsible for deciding WHICH LLM handles WHICH task.
-    For now: only Gemini for system design.
-    """
-
     def __init__(self):
-        self.gemini = GeminiLLMProvider()
+        self.gemini = None
+        self.groq = None
 
-    async def generate_system_design(self, payload):
-        return await self.gemini.generate_system_design(payload)
+    def _get_gemini(self):
+        if not self.gemini:
+            self.gemini = GeminiLLMProvider(temperature=0.2)
+        return self.gemini
 
-    async def generate_component_tree(self, system_design: str):
-        return await self.gemini.generate_component_tree(system_design)
+    def _get_groq(self):
+        if not self.groq:
+            self.groq = GroqLLMProvider(temperature=0.1)
+        return self.groq
+
+    async def generate_system_design(self, payload, prefer="gemini"):
+        if prefer == "gemini" and settings.GEMINI_API_KEY:
+            return await self._get_gemini().generate_system_design(payload)
+        return await self._get_groq().generate_system_design(payload)
+
+    async def generate_component_tree(self, system_design):
+        if not settings.GEMINI_API_KEY:
+            return None
+        return await self._get_gemini().generate_component_tree(system_design)
 
     async def shutdown(self):
-        await self.gemini.shutdown()
+        if self.gemini:
+            await self.gemini.shutdown()
+        if self.groq and hasattr(self.groq, "shutdown"):
+            await self.groq.shutdown()
+    
+    async def stream_system_design(self, payload, prefer="gemini"):
+        if prefer == "gemini" and settings.GEMINI_API_KEY:
+            async for token in self._get_gemini().stream_system_design(payload):
+                yield token
+        else:
+            # Groq fallback (non-streaming → chunked)
+            text = await self._get_groq().generate_system_design(payload)
+            for ch in text:
+                yield ch
