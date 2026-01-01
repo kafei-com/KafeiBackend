@@ -5,6 +5,7 @@ from app.utils.prompt_loader import load_prompt
 from app.schemas.architecture_spec import ArchitectureSpec
 import json
 from app.utils.json_fix import extract_json
+from langchain_core.messages import SystemMessage, HumanMessage
 class GroqLLMProvider:
     def __init__(self, temperature: float = 0.2):
         self.model = ChatGroq(
@@ -34,3 +35,21 @@ class GroqLLMProvider:
             raise ValueError("Groq returned invalid JSON for prompt expansion")
 
         return ArchitectureSpec(**data)
+    
+    async def chat(self, message: str) -> str:
+        """
+        Pure conversational chat.
+        No architecture assumptions.
+        """
+        messages = [
+            SystemMessage(
+                content=(
+                    "You are a helpful, friendly AI assistant. "
+                    "Respond naturally and concisely like a normal chatbot."
+                )
+            ),
+            HumanMessage(content=message),
+        ]
+
+        response = await self.model.ainvoke(messages)
+        return response.content.strip()

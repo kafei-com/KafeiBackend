@@ -57,3 +57,8 @@ class LLMOrchestrator:
         provider = self._get_gemini() if settings.GEMINI_API_KEY else self._get_groq()
         return await provider.generate_structured_spec(prompt)
 
+    async def chat(self, message: str) -> str:
+        """
+        Chat always uses Groq.
+        """
+        return await self._get_groq().chat(message)
