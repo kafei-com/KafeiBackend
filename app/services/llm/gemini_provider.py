@@ -1,12 +1,13 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
+import json
 from app.core.config import settings
-from app.utils.json_fix import safe_json_loads
 from app.services.llm.base import BaseLLM
-# from langchain_core.callbacks import AsyncIteratorCallbackHandler, CallbackManager
-# import asyncio
-# from langchain.callbacks.streaming_aiter import AsyncIteratorCallbackHandler
-
+from app.utils.json_fix import safe_json_loads
+from app.utils.prompt_loader import load_prompt
+from langchain_core.prompts import PromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+from app.schemas.architecture_spec import ArchitectureSpec
+from app.utils.json_fix import extract_json
+from app.utils.spec_coercion import coerce_architecture_spec
 
 class GeminiLLMProvider(BaseLLM):
     def __init__(self, temperature: float = 0.2):
@@ -24,7 +25,7 @@ class GeminiLLMProvider(BaseLLM):
         )
 
         chain = prompt | self.model
-        result = chain.invoke({"input": payload_text})
+        result = await chain.invoke({"input": payload_text})
 
         # print("SYSTEM DESIGN OUTPUT:", result.content)
         return result.content.strip()
@@ -35,7 +36,7 @@ class GeminiLLMProvider(BaseLLM):
         )
 
         chain = prompt | self.model
-        result = chain.invoke({"input": system_design})
+        result = await chain.ainvoke({"input": system_design})
 
         # print("COMPONENT TREE RAW:", result.content)
         return safe_json_loads(result.content)
@@ -51,3 +52,41 @@ class GeminiLLMProvider(BaseLLM):
         async for chunk in chain.astream({"input": payload_text}):
             if chunk.content:
                 yield chunk.content
+
+
+    async def expand_prompt_to_spec(self, prompt: str) -> ArchitectureSpec:
+        template = load_prompt("expand_prompt_to_spec.txt")
+        final_prompt = template.replace("{{prompt}}", prompt)
+
+        response = await self.generate_text(final_prompt)
+
+        try:
+            json_text = extract_json(response)
+            data = json.loads(json_text)
+            data = coerce_architecture_spec(data)
+        except Exception as e:
+            print("Raw response:", response)
+            raise ValueError("Invalid JSON from Gemini")
+
+        return ArchitectureSpec(**data)
+
+    async def generate_structured_spec(self, prompt: str):
+        """
+        Prompt MUST instruct Gemini to return JSON only.
+        """
+        response = await self.generate_text(prompt)
+
+        try:
+            json_text = extract_json(response)
+            return json.loads(json_text)
+        except Exception:
+            print("RAW STRUCTURED RESPONSE:\n", response)
+            raise ValueError("Invalid JSON from Gemini")
+
+    async def generate_text(self, prompt: str) -> str:
+        """
+        Raw text generation.
+        NO formatting assumptions.
+        """
+        response = await self.model.ainvoke(prompt)
+        return response.content
