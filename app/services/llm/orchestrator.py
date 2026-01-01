@@ -1,6 +1,7 @@
 from app.services.llm.gemini_provider import GeminiLLMProvider
 from app.services.llm.groq_provider import GroqLLMProvider
 from app.core.config import settings
+from app.services.input_normalizer import InputNormalizer
 
 class LLMOrchestrator:
     def __init__(self):
@@ -42,3 +43,22 @@ class LLMOrchestrator:
             text = await self._get_groq().generate_system_design(payload)
             for ch in text:
                 yield ch
+    
+    async def expand_prompt_to_spec(self, prompt: str):
+        if settings.GEMINI_API_KEY:
+            return await self._get_gemini().expand_prompt_to_spec(prompt)
+        return await self._get_groq().expand_prompt_to_spec(prompt)
+    
+    async def generate_structured_spec(self, prompt):
+        """
+        Always returns STRICT JSON.
+        Never used for streaming.
+        """
+        provider = self._get_gemini() if settings.GEMINI_API_KEY else self._get_groq()
+        return await provider.generate_structured_spec(prompt)
+
+    async def chat(self, message: str) -> str:
+        """
+        Chat always uses Groq.
+        """
+        return await self._get_groq().chat(message)

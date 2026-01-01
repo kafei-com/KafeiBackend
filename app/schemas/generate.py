@@ -1,12 +1,15 @@
 from pydantic import BaseModel
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 class GenerateRequest(BaseModel):
-    project_name: str
-    description: str
-    tech_stack: List[str]
-    requirements: str
-    use_case: str
+    project_name: Optional[str] = None
+    description: Optional[str] = None
+    use_case: Optional[str] = None
+    requirements: Optional[List[str]] = None
+    tech_stack: Optional[List[str]] = None
+
+    # NEW
+    prompt: Optional[str] = None
 
 class GenerateResponse(BaseModel):
     id: str
