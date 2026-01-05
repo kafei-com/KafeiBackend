@@ -62,3 +62,9 @@ class LLMOrchestrator:
         Chat always uses Groq.
         """
         return await self._get_groq().chat(message)
+
+    async def analyze_prompt_completeness(self, prompt: str) -> dict:
+        """
+        Prompt analysis / clarification detection → Gemini
+        """
+        return await self._get_gemini().analyze_prompt_completeness(prompt)
