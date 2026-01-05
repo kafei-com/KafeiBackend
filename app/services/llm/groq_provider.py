@@ -6,12 +6,28 @@ from app.schemas.architecture_spec import ArchitectureSpec
 import json
 from app.utils.json_fix import extract_json
 from langchain_core.messages import SystemMessage, HumanMessage
+
 class GroqLLMProvider:
     def __init__(self, temperature: float = 0.2):
         self.model = ChatGroq(
             model=settings.LLM_MODEL,
             api_key=settings.GROQ_API_KEY,
             temperature=temperature
+        )
+
+    def _get_chat_identity_prompt(self) -> str:
+        """
+        Loads the identity/personality system prompt for chat.
+        """
+        return load_prompt("chat_identity.txt")
+
+    def _mentions_ai_identity(self, text: str) -> bool:
+        lowered = text.lower()
+        return (
+            "as an ai" in lowered
+            or "ai assistant" in lowered
+            or "language model" in lowered
+            or "i am an ai" in lowered
         )
 
     async def generate_system_design(self, payload_text: str) -> str:
@@ -39,17 +55,31 @@ class GroqLLMProvider:
     async def chat(self, message: str) -> str:
         """
         Pure conversational chat.
-        No architecture assumptions.
+        Identity-guarded, human-sounding responses.
         """
+        system_prompt = self._get_chat_identity_prompt()
+
         messages = [
-            SystemMessage(
-                content=(
-                    "You are a helpful, friendly AI assistant. "
-                    "Respond naturally and concisely like a normal chatbot."
-                )
-            ),
+            SystemMessage(content=system_prompt),
             HumanMessage(content=message),
         ]
 
         response = await self.model.ainvoke(messages)
-        return response.content.strip()
+        reply = response.content.strip()
+
+        # 🛡️ Soft safety filter
+        if self._mentions_ai_identity(reply):
+            repair_messages = [
+                SystemMessage(content=system_prompt),
+                HumanMessage(
+                    content=(
+                        "Rephrase your previous response so it sounds human and natural. "
+                        "Do NOT mention AI, assistants, language models, or systems. "
+                        "Keep the same meaning."
+                    )
+                )
+            ]
+            repair_response = await self.model.ainvoke(repair_messages)
+            reply = repair_response.content.strip()
+
+        return reply
