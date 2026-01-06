@@ -17,6 +17,8 @@ python-jose[cryptography]
 redis
 slowapi
 PyJWT
+oauthlib
+itsdangerous
 
 # Config
 python-dotenv

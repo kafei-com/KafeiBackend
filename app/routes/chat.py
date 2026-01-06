@@ -15,14 +15,17 @@ async def chat(payload: dict):
 
     # 🟢 Normal chat
     if result["mode"] == "chat":
-        return {"reply": result["reply"]}
+        return {
+            "type": "chat",
+            "reply": result["reply"]
+        }
 
     # 🟡 Clarification
     if result["mode"] == "clarify":
         return {
             "type": "clarification",
             "questions": result["questions"],
-            "original_prompt": result["original_prompt"]
+            # "original_prompt": result["original_prompt"]
         }
 
     # 🔵 Generate → STREAM
@@ -32,7 +35,7 @@ async def chat(payload: dict):
             'type': 'handoff',
             'message': result.get(
                 'handoff',
-                "Alright — I'll put together a system design for this."
+                "Alright — I will put together a system design for this."
             )
         })}\n\n"
 

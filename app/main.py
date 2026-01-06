@@ -8,6 +8,9 @@ from app.routes.auth import router as auth_router
 from app.routes.users import router as users_router
 from app.core.docs import scalar_docs
 from app.routes.chat import router as chat_router
+from app.routes.oauth import router as oauth_router
+from starlette.middleware.sessions import SessionMiddleware
+from app.core.config import settings
 # Assuming GenerationService is still imported and contains the LLMProvider
 
 # Global variable to hold the initialized service instance
@@ -33,6 +36,10 @@ async def lifespan(app: FastAPI):
 # Pass the lifespan context manager to the FastAPI app
 app = FastAPI(title="Kafei Backend", lifespan=lifespan, docs_url=None, redoc_url=None)
 
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.SECRET_KEY or "dev-secret-key",
+)
 # ... (include router logic, potentially updating it to use the global_generation_service)
 @app.get("/docs", include_in_schema=False)
 def docs():
@@ -42,3 +49,4 @@ app.include_router(generate_router, prefix="/generate")
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(chat_router)
+app.include_router(oauth_router)
