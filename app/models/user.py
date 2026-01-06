@@ -1,4 +1,3 @@
-# app/models/user.py
 from typing import Optional
 from datetime import datetime
 from sqlmodel import Field, SQLModel
@@ -8,9 +7,12 @@ class User(SQLModel, table=True):
 
     name: str
     email: str = Field(unique=True, index=True)
-    phone: Optional[str] = Field(default=None)
+    phone: Optional[str] = None
 
-    hashed_password: str
+    # 🔐 Auth
+    hashed_password: Optional[str] = None   # <-- allow NULL
+    oauth_provider: Optional[str] = None    # google, github
+    oauth_sub: Optional[str] = None         # provider user id
 
     is_active: bool = Field(default=True)
     is_superuser: bool = Field(default=False)

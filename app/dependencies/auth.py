@@ -1,3 +1,5 @@
+# app/dependencies/auth.py
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select

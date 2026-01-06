@@ -39,6 +39,12 @@ class AuthService:
             select(User).where(User.email == payload.email)
         ).first()
 
+        if user.oauth_provider:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Use social login for this account"
+            )
+
         if not user or not verify_password(
             payload.password,
             user.hashed_password
