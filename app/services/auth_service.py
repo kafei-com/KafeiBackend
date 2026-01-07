@@ -9,7 +9,7 @@ from app.utils.jwt import create_access_token
 class AuthService:
 
     @staticmethod
-    def register_user(payload: UserCreate, session: Session) -> User:
+    def register_user(payload: UserCreate, session: Session):
         existing_user = session.exec(
             select(User).where(User.email == payload.email)
         ).first()
@@ -31,7 +31,10 @@ class AuthService:
         session.commit()
         session.refresh(user)
 
-        return user
+        return {
+            "message": "User registered successfully",
+            "user": user
+        }
 
     @staticmethod
     def login_user(payload, session: Session):
@@ -39,24 +42,22 @@ class AuthService:
             select(User).where(User.email == payload.email)
         ).first()
 
+        if not user or not verify_password(payload.password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password"
+            )
+
         if user.oauth_provider:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Use social login for this account"
             )
 
-        if not user or not verify_password(
-            payload.password,
-            user.hashed_password
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
-            )
-
         access_token = create_access_token(str(user.id))
 
         return {
+            "message": "Login successful",
             "access_token": access_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
         }

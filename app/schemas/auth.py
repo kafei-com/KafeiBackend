@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
+    message: str
     id: int
     name: str
     email: EmailStr
@@ -26,5 +27,6 @@ class LoginRequest(BaseModel):
 
 
 class TokenResponse(BaseModel):
+    message: str
     access_token: str
     token_type: str = "bearer"
