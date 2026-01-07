@@ -6,7 +6,6 @@ from app.models.user import User
 from app.services.oauth_client import oauth
 from app.utils.jwt import create_access_token
 from app.core.config import settings
-from fastapi.responses import RedirectResponse
 
 router = APIRouter(prefix="/auth", tags=["OAuth"])
 
@@ -61,10 +60,11 @@ async def google_callback(
         max_age=60 * 60 * 24
     )
 
-    return RedirectResponse(
-        url=f"{settings.FRONTEND_URL}/dashboard",
-        status_code=302
-    )
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": "Login Successful"
+    }
 
 
 
@@ -119,7 +119,17 @@ async def github_callback(
 
     access_token = create_access_token(str(user.id))
 
-    return RedirectResponse(
-        url=f"{settings.FRONTEND_URL}/dashboard",
-        status_code=302
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,        # False only for local dev
+        samesite="lax",
+        max_age=60 * 60 * 24
     )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": "Login Successful"
+    }
